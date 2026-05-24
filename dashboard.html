@@ -5,1253 +5,852 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BizCore OS — Home</title>
   <style>
-    /* ─── Reset & Base ─────────────────────────────────────────────────── */
+    /* ─── Reset & Variables ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg-deep:      #0a0d0a;
-      --bg-panel:     #0f1410;
-      --bg-card:      #131a13;
-      --bg-card-h:    #192219;
-      --border:       #1e2e1e;
-      --border-glow:  #2aff72;
-      --green-1:      #2aff72;
-      --green-2:      #00e05a;
+      --bg-deep:      #07090707;
+      --bg-deep:      #080c08;
+      --bg-panel:     #0d1210;
+      --bg-card:      #111811;
+      --bg-card-h:    #17211a;
+      --bg-sec:       #0b100c;
+      --bg-sec-hdr:   #0c1a0e;
+      --border:       #1a2a1c;
+      --green-1:      #2dff78;
+      --green-2:      #00df5a;
+      --green-3:      #00b848;
       --green-dim:    #1a8a40;
-      --green-muted:  #0d4a20;
-      --text-bright:  #e8ffe8;
-      --text-main:    #b0c8b0;
-      --text-muted:   #5a7a5a;
-      --text-label:   #7aaa7a;
-      --accent-warn:  #ffb830;
-      --accent-red:   #ff4545;
-      --glow-sm:      0 0 6px #2aff7255;
-      --glow-md:      0 0 14px #2aff7266, 0 0 30px #2aff7222;
-      --glow-lg:      0 0 20px #2aff7288, 0 0 50px #2aff7233;
-      --shadow-card:  0 4px 24px #00000088;
-      --radius:       8px;
-      --radius-sm:    5px;
+      --green-muted:  #0d4822;
+      --green-faint:  #081e0e;
+      --text-bright:  #e4ffe8;
+      --text-main:    #a0c4a8;
+      --text-muted:   #486050;
+      --text-label:   #68966c;
+      --warn:         #ffbb35;
+      --red:          #ff5252;
+      --glow-xs:      0 0 5px #2dff7833;
+      --glow-sm:      0 0 9px #2dff7844;
+      --glow-md:      0 0 16px #2dff7855, 0 0 34px #2dff7818;
+      --glow-lg:      0 0 24px #2dff7877, 0 0 56px #2dff7822;
+      --shadow:       0 3px 18px #00000077;
+      --r:            7px;
+      --rs:           5px;
       --font:         'Segoe UI', system-ui, sans-serif;
+      --mono:         'Cascadia Code', 'Consolas', 'Lucida Console', monospace;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg-deep);
-      color: var(--text-main);
-      font-family: var(--font);
-      font-size: 13px;
-      overflow: hidden;
-    }
+    html, body { height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: var(--font); font-size: 13px; overflow: hidden; }
 
     /* ─── App Shell ─────────────────────────────────────────────────────── */
-    .app-shell {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    .app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* subtle scan-line CRT overlay */
+    .app::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, #2dff7809 2px, #2dff7809 3px);
+      opacity: 0.18;
     }
 
     /* ─── Title Bar ─────────────────────────────────────────────────────── */
-    .title-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #070d07;
-      border-bottom: 1px solid var(--green-muted);
-      padding: 0 14px;
-      height: 32px;
-      flex-shrink: 0;
-      box-shadow: 0 1px 0 #2aff7222;
+    .titlebar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #050905; border-bottom: 1px solid #0c2212;
+      padding: 0 14px; height: 30px; flex-shrink: 0;
     }
-    .title-bar-left { display: flex; align-items: center; gap: 10px; }
-    .win-controls { display: flex; gap: 6px; }
-    .win-btn {
-      width: 12px; height: 12px; border-radius: 50%;
-      border: none; cursor: pointer; transition: filter 0.2s;
+    .win-btns { display: flex; gap: 6px; align-items: center; }
+    .wb { width: 11px; height: 11px; border-radius: 50%; border: none; cursor: pointer; transition: filter .2s; }
+    .wb:hover { filter: brightness(1.5) saturate(1.3); }
+    .wb.cl { background: #ff5f57; }
+    .wb.mn { background: #febc2e; }
+    .wb.mx { background: #28c840; box-shadow: 0 0 6px #28c84066; }
+    .app-name {
+      font-size: 11px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--green-dim); margin-left: 10px;
     }
-    .win-btn:hover { filter: brightness(1.4); }
-    .win-btn.close  { background: #ff5f57; }
-    .win-btn.min    { background: #febc2e; }
-    .win-btn.max    { background: #28c840; box-shadow: 0 0 6px #28c84088; }
-    .title-text {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
-      color: var(--green-dim); text-transform: uppercase;
-    }
-    .title-bar-right { display: flex; align-items: center; gap: 16px; }
-    .title-meta {
-      font-size: 11px; color: var(--text-muted);
-    }
-    .title-meta span { color: var(--green-dim); }
+    .tb-meta { font-size: 10px; color: var(--text-muted); }
+    .tb-meta em { color: var(--green-dim); font-style: normal; }
 
     /* ─── Menu Bar ──────────────────────────────────────────────────────── */
-    .menu-bar {
-      display: flex;
-      align-items: center;
-      background: #0c110c;
-      border-bottom: 1px solid var(--border);
-      padding: 0 10px;
-      height: 28px;
-      flex-shrink: 0;
-      gap: 2px;
+    .menubar {
+      display: flex; align-items: center;
+      background: #09100a; border-bottom: 1px solid var(--border);
+      padding: 0 10px; height: 25px; flex-shrink: 0; gap: 1px;
     }
-    .menu-item {
-      padding: 4px 10px;
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      color: var(--text-label);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .menu-item:hover {
-      background: var(--green-muted);
-      color: var(--green-1);
-      text-shadow: var(--glow-sm);
-    }
-    .menu-divider {
-      width: 1px; height: 14px;
-      background: var(--border);
-      margin: 0 4px;
-    }
+    .mi { padding: 3px 9px; border-radius: 3px; font-size: 11.5px; color: var(--text-label); cursor: pointer; transition: all .14s; user-select: none; }
+    .mi:hover { background: var(--green-muted); color: var(--green-1); text-shadow: var(--glow-xs); }
+    .msep { width: 1px; height: 12px; background: var(--border); margin: 0 3px; }
 
     /* ─── Toolbar ───────────────────────────────────────────────────────── */
     .toolbar {
-      display: flex;
-      align-items: center;
-      background: var(--bg-panel);
-      border-bottom: 1px solid var(--border);
-      padding: 0 14px;
-      height: 50px;
-      flex-shrink: 0;
-      gap: 6px;
+      display: flex; align-items: center;
+      background: var(--bg-panel); border-bottom: 1px solid var(--border);
+      padding: 0 12px; height: 46px; flex-shrink: 0; gap: 3px;
       box-shadow: 0 2px 12px #00000055;
     }
-    .tb-btn {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 3px;
-      padding: 5px 10px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.18s;
-      min-width: 54px;
+    .tbtn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; padding: 4px 8px; border-radius: var(--rs);
+      cursor: pointer; border: 1px solid transparent; transition: all .16s; min-width: 48px;
+      user-select: none;
     }
-    .tb-btn:hover {
-      background: var(--bg-card-h);
-      border-color: var(--green-muted);
-      box-shadow: var(--glow-sm);
+    .tbtn:hover { background: var(--bg-card-h); border-color: var(--green-muted); box-shadow: var(--glow-sm); }
+    .tbtn:active { transform: scale(.93); }
+    .tbtn .ti { font-size: 16px; line-height: 1; }
+    .tbtn .tl { font-size: 9px; color: var(--text-muted); white-space: nowrap; }
+    .tbtn:hover .tl { color: var(--green-1); }
+    .tsep { width: 1px; height: 28px; background: var(--border); margin: 0 2px; }
+    .search-wrap {
+      margin-left: auto; display: flex; align-items: center;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 0 11px; gap: 7px; transition: all .18s;
     }
-    .tb-btn .icon { font-size: 18px; line-height: 1; }
-    .tb-btn .label { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
-    .tb-btn:hover .label { color: var(--green-1); }
-    .tb-sep { width: 1px; height: 32px; background: var(--border); margin: 0 4px; }
-
-    .search-bar {
-      margin-left: auto;
-      display: flex; align-items: center;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 0 12px;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .search-bar:focus-within {
-      border-color: var(--green-dim);
-      box-shadow: var(--glow-sm);
-    }
-    .search-bar input {
-      background: transparent; border: none; outline: none;
-      color: var(--text-main); font-size: 12px; width: 180px;
-    }
-    .search-bar input::placeholder { color: var(--text-muted); }
-    .search-icon { color: var(--text-muted); font-size: 13px; }
+    .search-wrap:focus-within { border-color: var(--green-dim); box-shadow: var(--glow-sm); }
+    .search-wrap input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 11.5px; width: 165px; }
+    .search-wrap input::placeholder { color: var(--text-muted); }
 
     /* ─── Body Layout ───────────────────────────────────────────────────── */
-    .body-layout {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    .body { display: flex; flex: 1; overflow: hidden; }
 
-    /* ─── Sidebar ───────────────────────────────────────────────────────── */
+    /* ─── Left Sidebar ──────────────────────────────────────────────────── */
     .sidebar {
-      width: 190px;
-      flex-shrink: 0;
-      background: var(--bg-panel);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
+      width: 178px; flex-shrink: 0;
+      background: var(--bg-panel); border-right: 1px solid var(--border);
       overflow-y: auto;
     }
-    .sidebar::-webkit-scrollbar { width: 4px; }
-    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar { width: 3px; }
     .sidebar::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 2px; }
+    .sb-grp { padding: 11px 0 4px; }
+    .sb-grp-title { font-size: 9px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--text-muted); padding: 0 12px 5px; }
+    .sbi { display: flex; align-items: center; gap: 8px; padding: 7px 11px; cursor: pointer; border-left: 2px solid transparent; transition: all .13s; }
+    .sbi:hover { background: var(--bg-card-h); border-left-color: var(--green-dim); }
+    .sbi.on { background: var(--green-muted); border-left-color: var(--green-1); }
+    .sbi.on .sbl { color: var(--green-1); text-shadow: var(--glow-sm); }
+    .sbi .sbi-ic { font-size: 13px; width: 16px; text-align: center; }
+    .sbi .sbl { font-size: 11.5px; color: var(--text-label); }
+    .sbi .sbdg { margin-left: auto; background: var(--green-muted); color: var(--green-1); font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+    .sbdiv { height: 1px; background: var(--border); margin: 4px 11px; }
 
-    .sidebar-section { padding: 14px 0 6px; }
-    .sidebar-section-title {
-      font-size: 9px; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--text-muted);
-      padding: 0 14px 6px;
+    /* ─── Main Canvas ───────────────────────────────────────────────────── */
+    .canvas {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      padding: 14px; display: flex; flex-direction: column; gap: 11px;
     }
-    .sidebar-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 14px;
-      cursor: pointer;
-      border-left: 2px solid transparent;
-      transition: all 0.15s;
-    }
-    .sidebar-item:hover {
-      background: var(--bg-card-h);
-      border-left-color: var(--green-dim);
-    }
-    .sidebar-item.active {
-      background: var(--green-muted);
-      border-left-color: var(--green-1);
-      box-shadow: inset 0 0 12px #2aff7211;
-    }
-    .sidebar-item.active .si-label { color: var(--green-1); text-shadow: var(--glow-sm); }
-    .sidebar-item .si-icon { font-size: 15px; width: 18px; text-align: center; }
-    .sidebar-item .si-label { font-size: 12px; color: var(--text-label); }
-    .sidebar-item .si-badge {
-      margin-left: auto;
-      background: var(--green-muted);
-      color: var(--green-1);
-      font-size: 9px; font-weight: 700;
-      padding: 1px 5px; border-radius: 10px;
-      box-shadow: var(--glow-sm);
-    }
+    .canvas::-webkit-scrollbar { width: 5px; }
+    .canvas::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 3px; }
 
-    .sidebar-divider {
-      height: 1px; background: var(--border); margin: 6px 14px;
-    }
-
-    /* ─── Main Content ──────────────────────────────────────────────────── */
-    .main-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .main-content::-webkit-scrollbar { width: 6px; }
-    .main-content::-webkit-scrollbar-track { background: transparent; }
-    .main-content::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 3px; }
-
-    /* ─── Header Strip ──────────────────────────────────────────────────── */
-    .home-header {
+    /* ─── KPI Header Strip ──────────────────────────────────────────────── */
+    .kpi-strip {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 18px;
-      background: linear-gradient(135deg, #0c1a0c 0%, #0a120a 100%);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-card), inset 0 0 40px #2aff720a;
+      padding: 11px 18px;
+      background: linear-gradient(135deg, #0b1b0d 0%, #09100a 100%);
+      border: 1px solid var(--border); border-radius: var(--r);
+      box-shadow: var(--shadow), inset 0 0 40px #2dff780a;
+      flex-shrink: 0;
     }
-    .home-header-left { display: flex; flex-direction: column; gap: 2px; }
-    .home-header-title {
-      font-size: 20px; font-weight: 700;
-      color: var(--green-1);
-      text-shadow: var(--glow-md);
-      letter-spacing: 0.03em;
-    }
-    .home-header-sub { font-size: 11px; color: var(--text-muted); }
-    .home-header-right { display: flex; gap: 10px; align-items: center; }
-    .hdr-stat {
-      display: flex; flex-direction: column; align-items: flex-end;
-      gap: 1px;
-    }
-    .hdr-stat .val {
-      font-size: 16px; font-weight: 700; color: var(--green-1);
-      text-shadow: var(--glow-sm);
-    }
-    .hdr-stat .val.warn { color: var(--accent-warn); text-shadow: 0 0 8px #ffb83044; }
-    .hdr-stat .val.bad  { color: var(--accent-red);  text-shadow: 0 0 8px #ff454544; }
-    .hdr-stat .key { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .hdr-stat-divider { width: 1px; height: 28px; background: var(--border); }
+    .kpi-left .kpi-title { font-size: 19px; font-weight: 700; color: var(--green-1); text-shadow: var(--glow-md); letter-spacing: .02em; }
+    .kpi-left .kpi-sub { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+    .kpi-right { display: flex; align-items: center; gap: 14px; }
+    .kpi-cell { display: flex; flex-direction: column; align-items: flex-end; }
+    .kpi-v { font-size: 15px; font-weight: 700; color: var(--green-1); text-shadow: var(--glow-sm); }
+    .kpi-v.w { color: var(--warn); text-shadow: 0 0 8px #ffbb3533; }
+    .kpi-v.r { color: var(--red);  text-shadow: 0 0 8px #ff525233; }
+    .kpi-k { font-size: 8.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
+    .kpi-sep { width: 1px; height: 26px; background: var(--border); }
 
-    /* ─── Workflow Grid ─────────────────────────────────────────────────── */
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-
-    /* ─── Workflow Lane ─────────────────────────────────────────────────── */
-    .lane {
-      background: var(--bg-card);
+    /* ─── Workflow Section Container ────────────────────────────────────── */
+    .wf-section {
+      background: var(--bg-sec);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--r);
       overflow: hidden;
-      box-shadow: var(--shadow-card);
-      display: flex;
-      flex-direction: column;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
     }
-    .lane-header {
+
+    /* Section header */
+    .wf-hdr {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 14px;
-      background: #0c180c;
+      padding: 7px 14px;
+      background: var(--bg-sec-hdr);
       border-bottom: 1px solid var(--border);
     }
-    .lane-icon { font-size: 18px; }
-    .lane-title {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--green-1);
-      text-shadow: var(--glow-sm);
+    .wf-hdr-ic { font-size: 16px; }
+    .wf-hdr-title {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--green-1); text-shadow: var(--glow-sm);
     }
-    .lane-count {
-      margin-left: auto;
-      background: var(--green-muted);
-      color: var(--green-1);
-      font-size: 9px; font-weight: 700;
-      padding: 2px 7px; border-radius: 10px;
+    .wf-hdr-badge {
+      margin-left: auto; background: var(--green-muted); color: var(--green-1);
+      font-size: 8.5px; font-weight: 700; padding: 1px 8px; border-radius: 8px;
     }
-    .lane-body {
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
+    .wf-hdr-badge.w { background: #2e1700; color: var(--warn); }
 
-    /* ─── Workflow Step ─────────────────────────────────────────────────── */
-    .step {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.18s;
-      position: relative;
-    }
-    .step:hover {
-      background: var(--bg-card-h);
-      border-color: var(--green-dim);
-      box-shadow: var(--glow-sm);
-      transform: translateX(2px);
-    }
-    .step-icon {
-      font-size: 20px;
-      width: 30px; height: 30px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--green-muted);
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
-    }
-    .step-info { flex: 1; min-width: 0; }
-    .step-name {
-      font-size: 12px; font-weight: 600; color: var(--text-bright);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .step-desc { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-    .step-badge {
-      background: var(--green-muted);
-      color: var(--green-1);
-      font-size: 9px; font-weight: 700;
-      padding: 2px 6px; border-radius: 3px;
-      white-space: nowrap;
-    }
-    .step-badge.warn { background: #3a2800; color: var(--accent-warn); }
-    .step-badge.bad  { background: #3a0000; color: var(--accent-red);  }
+    /* Section body */
+    .wf-body { padding: 14px 16px; }
 
-    /* Arrow connector between steps */
-    .step-arrow {
-      text-align: center;
-      color: var(--green-muted);
-      font-size: 14px;
-      line-height: 1;
-      filter: drop-shadow(0 0 4px var(--green-dim));
-      margin: -2px 14px;
+    /* ─── Horizontal Flow Row ───────────────────────────────────────────── */
+    .flow-row {
+      display: flex; align-items: center;
+      flex-wrap: nowrap;
     }
+    .flow-row + .flow-row { margin-top: 8px; }
 
-    /* ─── Bottom Row ────────────────────────────────────────────────────── */
-    .bottom-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-
-    /* ─── Summary Card ──────────────────────────────────────────────────── */
-    .sum-card {
+    /* ─── Workflow Node (QB-style box: icon on top, label below) ────────── */
+    .wf-node {
+      display: flex; flex-direction: column; align-items: center;
+      width: 108px; min-height: 92px;
+      padding: 11px 7px 9px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: var(--shadow-card);
+      border-radius: var(--rs);
+      cursor: pointer; text-align: center; flex-shrink: 0;
+      transition: border-color .18s, background .18s, box-shadow .18s, transform .18s;
+      position: relative;
+      box-shadow: 0 2px 8px #00000055;
+      user-select: none;
     }
-    .sum-card-title {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--text-label);
-      margin-bottom: 12px;
-    }
-    .sum-card-title .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--green-1);
-      box-shadow: 0 0 6px var(--green-1);
-    }
-
-    .kpi-row {
-      display: flex; gap: 8px; margin-bottom: 12px;
-    }
-    .kpi {
-      flex: 1;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      text-align: center;
-    }
-    .kpi-val {
-      font-size: 17px; font-weight: 700;
-      color: var(--green-1);
-      text-shadow: var(--glow-sm);
-    }
-    .kpi-val.warn { color: var(--accent-warn); }
-    .kpi-val.bad  { color: var(--accent-red); }
-    .kpi-key { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
-
-    /* Mini bar chart */
-    .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 40px; margin-top: 4px; }
-    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .bar {
-      width: 100%;
-      background: linear-gradient(to top, var(--green-2), var(--green-1));
-      border-radius: 2px 2px 0 0;
-      box-shadow: 0 0 6px #2aff7244;
-      transition: height 0.4s ease;
-    }
-    .bar-label { font-size: 8px; color: var(--text-muted); }
-
-    /* Activity list */
-    .activity-list { display: flex; flex-direction: column; gap: 6px; }
-    .act-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 7px 10px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .act-item:hover {
-      border-color: var(--green-dim);
+    .wf-node:hover {
+      border-color: var(--green-2);
       background: var(--bg-card-h);
+      box-shadow: var(--glow-lg), 0 4px 14px #00000066;
+      transform: translateY(-3px);
+      z-index: 2;
     }
-    .act-dot {
-      width: 8px; height: 8px; border-radius: 50%;
+    .wf-node .nn-ic { font-size: 28px; line-height: 1; flex-shrink: 0; margin-bottom: 6px; }
+    .wf-node .nn-lbl { font-size: 9.5px; color: var(--text-main); line-height: 1.38; font-weight: 500; }
+    .wf-node .nn-badge {
+      margin-top: 6px; background: var(--green-muted); color: var(--green-1);
+      font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 7px; white-space: nowrap;
+    }
+    .wf-node .nn-badge.w { background: #301800; color: var(--warn); }
+    .wf-node .nn-badge.r { background: #300000; color: var(--red);  }
+
+    /* Smaller secondary node variant */
+    .wf-node.sm { width: 92px; min-height: 78px; padding: 8px 6px 7px; opacity: .82; }
+    .wf-node.sm .nn-ic { font-size: 22px; margin-bottom: 5px; }
+    .wf-node.sm .nn-lbl { font-size: 9px; }
+
+    /* ─── Flow Arrow Connector ──────────────────────────────────────────── */
+    .flow-arr {
+      display: flex; align-items: center; flex-shrink: 0;
+      width: 36px; position: relative;
+    }
+    .flow-arr .arr-line {
+      width: 100%; height: 2px;
+      background: linear-gradient(to right, var(--green-muted), var(--green-dim));
+      box-shadow: 0 0 5px var(--green-muted);
+    }
+    .flow-arr .arr-head {
+      position: absolute; right: -1px;
+      color: var(--green-2); font-size: 10px; line-height: 1;
+      text-shadow: 0 0 8px var(--green-2);
+    }
+
+    /* Narrow connector for secondary/branch rows */
+    .flow-arr.sm { width: 26px; }
+
+    /* ─── Branch Connector (for multi-path vendor section) ──────────────── */
+    .branch-wrap {
+      display: flex; flex-direction: column; align-items: flex-start;
       flex-shrink: 0;
     }
-    .act-dot.green { background: var(--green-1); box-shadow: 0 0 6px var(--green-1); }
-    .act-dot.warn  { background: var(--accent-warn); box-shadow: 0 0 6px var(--accent-warn); }
-    .act-dot.red   { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
-    .act-info { flex: 1; min-width: 0; }
-    .act-name { font-size: 11px; color: var(--text-bright); }
-    .act-meta { font-size: 10px; color: var(--text-muted); }
-    .act-amount { font-size: 12px; font-weight: 600; color: var(--green-1); }
-    .act-amount.warn { color: var(--accent-warn); }
+    .branch-drop {       /* vertical line dropping from node above */
+      width: 2px; height: 10px;
+      background: var(--green-muted); box-shadow: 0 0 5px var(--green-muted);
+      align-self: center;
+    }
+    .branch-run {        /* horizontal "└──────▶" connector line */
+      font-family: var(--mono);
+      font-size: 11.5px; line-height: 1;
+      color: var(--green-dim);
+      text-shadow: 0 0 7px var(--green-dim);
+      letter-spacing: -.3px;
+      white-space: nowrap;
+      margin-top: 5px;
+    }
 
-    /* ─── Quick Actions ─────────────────────────────────────────────────── */
-    .quick-actions {
-      display: flex; gap: 8px;
-    }
-    .qa-btn {
-      flex: 1;
+    /* ─── Row gap spacer ────────────────────────────────────────────────── */
+    .row-gap { flex: 1; min-width: 16px; }
+
+    /* ─── Section divider inside wf-body ───────────────────────────────── */
+    .sec-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+    /* ─── Bottom Two-Column (Company + Banking) ─────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+    /* ─── Icon Grid (standalone nodes, no arrows) ───────────────────────── */
+    .icon-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+    .ig-node {
       display: flex; flex-direction: column; align-items: center;
-      gap: 5px; padding: 10px 8px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      transition: all 0.18s;
+      width: 96px; min-height: 80px; padding: 9px 7px 7px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rs);
+      cursor: pointer; text-align: center; flex-shrink: 0;
+      transition: border-color .18s, background .18s, box-shadow .18s, transform .18s;
+      box-shadow: 0 2px 8px #00000044; user-select: none;
     }
-    .qa-btn:hover {
-      background: var(--green-muted);
-      border-color: var(--green-dim);
-      box-shadow: var(--glow-sm);
+    .ig-node:hover {
+      border-color: var(--green-2); background: var(--bg-card-h);
+      box-shadow: var(--glow-md); transform: translateY(-2px);
     }
-    .qa-btn .qa-icon { font-size: 22px; }
-    .qa-btn .qa-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
-    .qa-btn:hover .qa-label { color: var(--green-1); }
+    .ig-node:active { transform: scale(.94); }
+    .ig-node .ig-ic { font-size: 25px; line-height: 1; margin-bottom: 5px; }
+    .ig-node .ig-lbl { font-size: 9px; color: var(--text-main); line-height: 1.35; font-weight: 500; }
 
     /* ─── Right Panel ───────────────────────────────────────────────────── */
     .right-panel {
-      width: 230px;
-      flex-shrink: 0;
-      background: var(--bg-panel);
-      border-left: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
+      width: 212px; flex-shrink: 0;
+      background: var(--bg-panel); border-left: 1px solid var(--border);
       overflow-y: auto;
     }
-    .right-panel::-webkit-scrollbar { width: 4px; }
+    .right-panel::-webkit-scrollbar { width: 3px; }
     .right-panel::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 2px; }
-
-    .rp-section {
-      padding: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .rp-title {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    .rp-sec { padding: 11px; border-bottom: 1px solid var(--border); }
+    .rp-t {
+      font-size: 8.5px; font-weight: 700; letter-spacing: .13em;
       text-transform: uppercase; color: var(--text-muted);
-      margin-bottom: 10px;
-      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 5px;
     }
-    .rp-title::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
-
-    /* Reminders */
-    .reminder-item {
-      display: flex; align-items: flex-start; gap: 8px;
-      padding: 7px 0;
-      border-bottom: 1px solid #1a221a;
-    }
-    .reminder-item:last-child { border-bottom: none; }
-    .rem-icon { font-size: 14px; margin-top: 1px; }
-    .rem-text { font-size: 11px; color: var(--text-main); line-height: 1.4; }
-    .rem-due { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-    .rem-due.soon { color: var(--accent-warn); }
-    .rem-due.overdue { color: var(--accent-red); }
-
-    /* Account Balances */
-    .bal-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px solid #1a221a;
-    }
-    .bal-item:last-child { border-bottom: none; }
-    .bal-name { font-size: 11px; color: var(--text-label); }
-    .bal-val { font-size: 12px; font-weight: 600; color: var(--green-1); text-shadow: var(--glow-sm); }
-    .bal-val.neg { color: var(--accent-red); }
-
-    /* Calendar mini */
-    .cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      gap: 2px; text-align: center;
-    }
-    .cal-day-label { font-size: 9px; color: var(--text-muted); padding: 2px 0; }
-    .cal-day {
-      font-size: 10px;
-      padding: 4px 2px;
-      border-radius: 3px;
-      cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.15s;
-    }
-    .cal-day:hover { background: var(--bg-card-h); color: var(--text-main); }
-    .cal-day.today {
-      background: var(--green-muted);
-      color: var(--green-1);
-      font-weight: 700;
-      box-shadow: var(--glow-sm);
-    }
-    .cal-day.has-event { color: var(--green-1); font-weight: 600; }
-    .cal-day.other-month { opacity: 0.3; }
+    .rp-t::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .rem { display: flex; gap: 7px; padding: 6px 0; border-bottom: 1px solid #121b12; }
+    .rem:last-child { border-bottom: none; }
+    .rem-ic { font-size: 12px; flex-shrink: 0; padding-top: 1px; }
+    .rem-body .rem-tx { font-size: 10.5px; color: var(--text-main); line-height: 1.35; }
+    .rem-body .rem-d { font-size: 9px; color: var(--text-muted); margin-top: 1px; }
+    .rem-body .rem-d.s { color: var(--warn); }
+    .rem-body .rem-d.ov { color: var(--red); }
+    .bal { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #121b12; }
+    .bal:last-child { border-bottom: none; }
+    .bal-n { font-size: 10.5px; color: var(--text-label); }
+    .bal-v { font-size: 11.5px; font-weight: 600; color: var(--green-1); text-shadow: var(--glow-sm); }
+    .bal-v.neg { color: var(--red); text-shadow: none; }
 
     /* ─── Status Bar ────────────────────────────────────────────────────── */
-    .status-bar {
-      display: flex; align-items: center; gap: 14px;
-      background: #070d07;
-      border-top: 1px solid var(--green-muted);
-      padding: 0 14px;
-      height: 24px;
-      flex-shrink: 0;
-      font-size: 10px;
-      color: var(--text-muted);
+    .statusbar {
+      display: flex; align-items: center; gap: 11px;
+      background: #050905; border-top: 1px solid #0c2212;
+      padding: 0 13px; height: 22px; flex-shrink: 0;
+      font-size: 9.5px; color: var(--text-muted);
     }
-    .sb-item { display: flex; align-items: center; gap: 4px; }
     .sb-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--green-1);
-      box-shadow: 0 0 5px var(--green-1);
-      animation: pulse 2s infinite;
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green-1); box-shadow: 0 0 5px var(--green-1);
+      animation: blink 2.4s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .sb-sep { width: 1px; height: 12px; background: var(--border); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .sb-pipe { width: 1px; height: 11px; background: var(--border); }
     .sb-right { margin-left: auto; color: var(--green-dim); }
 
     /* ─── Scrollbar global ──────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
-
-    /* ─── Glow scan-line ambient ─────────────────────────────────────────── */
-    .app-shell::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        #2aff720a 2px,
-        #2aff720a 3px
-      );
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.15;
-    }
   </style>
 </head>
 <body>
-<div class="app-shell">
+<div class="app">
 
   <!-- ── Title Bar ─────────────────────────────────────────────────────── -->
-  <div class="title-bar">
-    <div class="title-bar-left">
-      <div class="win-controls">
-        <button class="win-btn close"></button>
-        <button class="win-btn min"></button>
-        <button class="win-btn max"></button>
+  <div class="titlebar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="win-btns">
+        <button class="wb cl"></button>
+        <button class="wb mn"></button>
+        <button class="wb mx"></button>
       </div>
-      <span class="title-text">BizCore OS &nbsp;·&nbsp; v1.0</span>
+      <span class="app-name">BizCore OS &nbsp;·&nbsp; v1.0</span>
     </div>
-    <div class="title-bar-right">
-      <span class="title-meta">Company: <span>Acme Enterprises LLC</span></span>
-      <span class="title-meta">FY: <span>2026</span></span>
-      <span class="title-meta">User: <span>Admin</span></span>
-    </div>
+    <span class="tb-meta">
+      Company: <em>Acme Enterprises LLC</em>
+      &nbsp;·&nbsp; FY: <em>2026</em>
+      &nbsp;·&nbsp; User: <em>Admin</em>
+    </span>
   </div>
 
   <!-- ── Menu Bar ──────────────────────────────────────────────────────── -->
-  <div class="menu-bar">
-    <div class="menu-item">File</div>
-    <div class="menu-item">Edit</div>
-    <div class="menu-item">View</div>
-    <div class="menu-divider"></div>
-    <div class="menu-item">Customers</div>
-    <div class="menu-item">Vendors</div>
-    <div class="menu-item">Employees</div>
-    <div class="menu-item">Banking</div>
-    <div class="menu-item">Reports</div>
-    <div class="menu-divider"></div>
-    <div class="menu-item">Lists</div>
-    <div class="menu-item">Payroll</div>
-    <div class="menu-item">Window</div>
-    <div class="menu-item">Help</div>
+  <div class="menubar">
+    <div class="mi">File</div>
+    <div class="mi">Edit</div>
+    <div class="mi">View</div>
+    <div class="msep"></div>
+    <div class="mi">Customers</div>
+    <div class="mi">Vendors</div>
+    <div class="mi">Employees</div>
+    <div class="mi">Banking</div>
+    <div class="mi">Reports</div>
+    <div class="msep"></div>
+    <div class="mi">Lists</div>
+    <div class="mi">Payroll</div>
+    <div class="mi">Window</div>
+    <div class="mi">Help</div>
   </div>
 
   <!-- ── Toolbar ───────────────────────────────────────────────────────── -->
   <div class="toolbar">
-    <div class="tb-btn"><span class="icon">🏠</span><span class="label">Home</span></div>
-    <div class="tb-btn"><span class="icon">📊</span><span class="label">Dashboard</span></div>
-    <div class="tb-sep"></div>
-    <div class="tb-btn"><span class="icon">📄</span><span class="label">Invoice</span></div>
-    <div class="tb-btn"><span class="icon">💳</span><span class="label">Receive</span></div>
-    <div class="tb-btn"><span class="icon">📦</span><span class="label">Purchase</span></div>
-    <div class="tb-btn"><span class="icon">💰</span><span class="label">Pay Bills</span></div>
-    <div class="tb-sep"></div>
-    <div class="tb-btn"><span class="icon">👥</span><span class="label">Customers</span></div>
-    <div class="tb-btn"><span class="icon">🏭</span><span class="label">Vendors</span></div>
-    <div class="tb-btn"><span class="icon">👷</span><span class="label">Employees</span></div>
-    <div class="tb-sep"></div>
-    <div class="tb-btn"><span class="icon">📈</span><span class="label">Reports</span></div>
-    <div class="tb-btn"><span class="icon">🏦</span><span class="label">Banking</span></div>
-    <div class="tb-btn"><span class="icon">⚙️</span><span class="label">Settings</span></div>
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
+    <div class="tbtn"><span class="ti">🏠</span><span class="tl">Home</span></div>
+    <div class="tbtn"><span class="ti">📊</span><span class="tl">Dashboard</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ti">📄</span><span class="tl">Invoice</span></div>
+    <div class="tbtn"><span class="ti">💵</span><span class="tl">Receive</span></div>
+    <div class="tbtn"><span class="ti">📦</span><span class="tl">Purchase</span></div>
+    <div class="tbtn"><span class="ti">💳</span><span class="tl">Pay Bills</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ti">👥</span><span class="tl">Customers</span></div>
+    <div class="tbtn"><span class="ti">🏭</span><span class="tl">Vendors</span></div>
+    <div class="tbtn"><span class="ti">👷</span><span class="tl">Employees</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ti">📈</span><span class="tl">Reports</span></div>
+    <div class="tbtn"><span class="ti">🏦</span><span class="tl">Banking</span></div>
+    <div class="tbtn"><span class="ti">⚙️</span><span class="tl">Settings</span></div>
+    <div class="search-wrap">
+      <span style="color:var(--text-muted);font-size:12px">🔍</span>
       <input type="text" placeholder="Search transactions, contacts…" />
     </div>
   </div>
 
   <!-- ── Body ──────────────────────────────────────────────────────────── -->
-  <div class="body-layout">
+  <div class="body">
 
     <!-- Left Sidebar -->
     <div class="sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Navigation</div>
-        <div class="sidebar-item active">
-          <span class="si-icon">🏠</span><span class="si-label">Home</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">📊</span><span class="si-label">Overview</span>
-        </div>
+      <div class="sb-grp">
+        <div class="sb-grp-title">Navigate</div>
+        <div class="sbi on"><span class="sbi-ic">🏠</span><span class="sbl">Home</span></div>
+        <div class="sbi"><span class="sbi-ic">📊</span><span class="sbl">Overview</span></div>
       </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Customers</div>
-        <div class="sidebar-item">
-          <span class="si-icon">📄</span><span class="si-label">Invoices</span>
-          <span class="si-badge">12</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">💵</span><span class="si-label">Receive Payments</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">📝</span><span class="si-label">Estimates</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">🔁</span><span class="si-label">Credit Memos</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">🏧</span><span class="si-label">Deposits</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">👥</span><span class="si-label">Customer List</span>
-        </div>
+      <div class="sbdiv"></div>
+      <div class="sb-grp">
+        <div class="sb-grp-title">Customers</div>
+        <div class="sbi"><span class="sbi-ic">📄</span><span class="sbl">Invoices</span><span class="sbdg">12</span></div>
+        <div class="sbi"><span class="sbi-ic">💵</span><span class="sbl">Receive Payments</span></div>
+        <div class="sbi"><span class="sbi-ic">📝</span><span class="sbl">Estimates</span></div>
+        <div class="sbi"><span class="sbi-ic">🔁</span><span class="sbl">Credit Memos</span></div>
+        <div class="sbi"><span class="sbi-ic">🏧</span><span class="sbl">Deposits</span></div>
+        <div class="sbi"><span class="sbi-ic">👥</span><span class="sbl">Customer List</span></div>
       </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Vendors</div>
-        <div class="sidebar-item">
-          <span class="si-icon">📋</span><span class="si-label">Purchase Orders</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">📦</span><span class="si-label">Receive Items</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">💳</span><span class="si-label">Pay Bills</span>
-          <span class="si-badge">5</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">🏭</span><span class="si-label">Vendor List</span>
-        </div>
+      <div class="sbdiv"></div>
+      <div class="sb-grp">
+        <div class="sb-grp-title">Vendors</div>
+        <div class="sbi"><span class="sbi-ic">📋</span><span class="sbl">Purchase Orders</span></div>
+        <div class="sbi"><span class="sbi-ic">📦</span><span class="sbl">Receive Items</span></div>
+        <div class="sbi"><span class="sbi-ic">💳</span><span class="sbl">Pay Bills</span><span class="sbdg">5</span></div>
+        <div class="sbi"><span class="sbi-ic">🏭</span><span class="sbl">Vendor List</span></div>
       </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Employees</div>
-        <div class="sidebar-item">
-          <span class="si-icon">⏱️</span><span class="si-label">Time Tracking</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">💼</span><span class="si-label">Run Payroll</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">👷</span><span class="si-label">Employee List</span>
-        </div>
+      <div class="sbdiv"></div>
+      <div class="sb-grp">
+        <div class="sb-grp-title">Employees</div>
+        <div class="sbi"><span class="sbi-ic">⏱️</span><span class="sbl">Time Tracking</span></div>
+        <div class="sbi"><span class="sbi-ic">💼</span><span class="sbl">Run Payroll</span></div>
+        <div class="sbi"><span class="sbi-ic">👷</span><span class="sbl">Employee List</span></div>
       </div>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-section">
-        <div class="sidebar-section-title">Banking</div>
-        <div class="sidebar-item">
-          <span class="si-icon">🏦</span><span class="si-label">Bank Accounts</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">🔄</span><span class="si-label">Reconcile</span>
-        </div>
-        <div class="sidebar-item">
-          <span class="si-icon">📤</span><span class="si-label">Write Checks</span>
-        </div>
+      <div class="sbdiv"></div>
+      <div class="sb-grp">
+        <div class="sb-grp-title">Banking</div>
+        <div class="sbi"><span class="sbi-ic">🏦</span><span class="sbl">Bank Accounts</span></div>
+        <div class="sbi"><span class="sbi-ic">🔄</span><span class="sbl">Reconcile</span></div>
+        <div class="sbi"><span class="sbi-ic">📤</span><span class="sbl">Write Checks</span></div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+    <!-- ── Main Workflow Canvas ─────────────────────────────────────────── -->
+    <div class="canvas">
 
-      <!-- Header Strip -->
-      <div class="home-header">
-        <div class="home-header-left">
-          <div class="home-header-title">&#9670; Business Home</div>
-          <div class="home-header-sub">Acme Enterprises LLC &nbsp;·&nbsp; Fiscal Year 2026 &nbsp;·&nbsp; May 24, 2026</div>
+      <!-- KPI Strip -->
+      <div class="kpi-strip">
+        <div class="kpi-left">
+          <div class="kpi-title">&#9670; Business Home</div>
+          <div class="kpi-sub">Acme Enterprises LLC &nbsp;·&nbsp; Fiscal Year 2026 &nbsp;·&nbsp; May 24, 2026</div>
         </div>
-        <div class="home-header-right">
-          <div class="hdr-stat">
-            <div class="val">$142,830</div>
-            <div class="key">Cash on Hand</div>
-          </div>
-          <div class="hdr-stat-divider"></div>
-          <div class="hdr-stat">
-            <div class="val">$38,450</div>
-            <div class="key">A/R Balance</div>
-          </div>
-          <div class="hdr-stat-divider"></div>
-          <div class="hdr-stat">
-            <div class="val warn">$21,200</div>
-            <div class="key">A/P Due</div>
-          </div>
-          <div class="hdr-stat-divider"></div>
-          <div class="hdr-stat">
-            <div class="val bad">$4,100</div>
-            <div class="key">Overdue</div>
-          </div>
+        <div class="kpi-right">
+          <div class="kpi-cell"><div class="kpi-v">$142,830</div><div class="kpi-k">Cash on Hand</div></div>
+          <div class="kpi-sep"></div>
+          <div class="kpi-cell"><div class="kpi-v">$38,450</div><div class="kpi-k">A/R Balance</div></div>
+          <div class="kpi-sep"></div>
+          <div class="kpi-cell"><div class="kpi-v w">$21,200</div><div class="kpi-k">A/P Due</div></div>
+          <div class="kpi-sep"></div>
+          <div class="kpi-cell"><div class="kpi-v r">$4,100</div><div class="kpi-k">Overdue</div></div>
         </div>
       </div>
 
-      <!-- Workflow Grid -->
-      <div class="workflow-grid">
-
-        <!-- CUSTOMERS LANE -->
-        <div class="lane">
-          <div class="lane-header">
-            <span class="lane-icon">👥</span>
-            <span class="lane-title">Customers</span>
-            <span class="lane-count">12 active</span>
-          </div>
-          <div class="lane-body">
-
-            <div class="step">
-              <div class="step-icon">📝</div>
-              <div class="step-info">
-                <div class="step-name">Create Estimate</div>
-                <div class="step-desc">Quote jobs & projects</div>
-              </div>
-              <span class="step-badge">3 open</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">📄</div>
-              <div class="step-info">
-                <div class="step-name">Create Invoice</div>
-                <div class="step-desc">Bill customers for work</div>
-              </div>
-              <span class="step-badge">12 sent</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">💵</div>
-              <div class="step-info">
-                <div class="step-name">Receive Payments</div>
-                <div class="step-desc">Record customer payments</div>
-              </div>
-              <span class="step-badge warn">4 pending</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">🏦</div>
-              <div class="step-info">
-                <div class="step-name">Make Deposit</div>
-                <div class="step-desc">Deposit to bank account</div>
-              </div>
-              <span class="step-badge">$18,200</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">🔁</div>
-              <div class="step-info">
-                <div class="step-name">Credit Memo / Refund</div>
-                <div class="step-desc">Issue credits or refunds</div>
-              </div>
-            </div>
-
-          </div>
+      <!-- ════════════════════════════════════════════════════════
+           CUSTOMERS  — horizontal workflow chain
+           Estimates → Invoices → Receive Payments → Deposits
+           Secondary: Stmt Charges → Statements → Refunds
+           ════════════════════════════════════════════════════════ -->
+      <div class="wf-section">
+        <div class="wf-hdr">
+          <span class="wf-hdr-ic">👥</span>
+          <span class="wf-hdr-title">Customers</span>
+          <span class="wf-hdr-badge">12 active invoices · 4 pending payments</span>
         </div>
+        <div class="wf-body">
 
-        <!-- VENDORS LANE -->
-        <div class="lane">
-          <div class="lane-header">
-            <span class="lane-icon">🏭</span>
-            <span class="lane-title">Vendors</span>
-            <span class="lane-count">5 bills due</span>
+          <!-- Primary flow row -->
+          <div class="flow-row">
+            <div class="wf-node">
+              <div class="nn-ic">📝</div>
+              <div class="nn-lbl">Create<br>Estimates</div>
+              <div class="nn-badge">3 open</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">📄</div>
+              <div class="nn-lbl">Create<br>Invoices</div>
+              <div class="nn-badge">12 sent</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">💵</div>
+              <div class="nn-lbl">Receive<br>Payments</div>
+              <div class="nn-badge w">4 pending</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">🏦</div>
+              <div class="nn-lbl">Record<br>Deposits</div>
+              <div class="nn-badge">$18,200</div>
+            </div>
+
+            <div class="row-gap"></div>
+
+            <!-- Secondary / optional steps, visually dimmed -->
+            <div class="wf-node sm">
+              <div class="nn-ic">⚡</div>
+              <div class="nn-lbl">Finance<br>Charges</div>
+            </div>
+            <div class="flow-arr sm"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node sm">
+              <div class="nn-ic">📜</div>
+              <div class="nn-lbl">Statements</div>
+            </div>
+            <div class="flow-arr sm"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node sm">
+              <div class="nn-ic">🔁</div>
+              <div class="nn-lbl">Refunds &amp;<br>Credits</div>
+            </div>
           </div>
-          <div class="lane-body">
 
-            <div class="step">
-              <div class="step-icon">📋</div>
-              <div class="step-info">
-                <div class="step-name">Purchase Orders</div>
-                <div class="step-desc">Order from suppliers</div>
-              </div>
-              <span class="step-badge">2 open</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">📦</div>
-              <div class="step-info">
-                <div class="step-name">Receive Items</div>
-                <div class="step-desc">Log received inventory</div>
-              </div>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">🧾</div>
-              <div class="step-info">
-                <div class="step-name">Enter Bills</div>
-                <div class="step-desc">Record vendor invoices</div>
-              </div>
-              <span class="step-badge warn">5 unpaid</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">💳</div>
-              <div class="step-info">
-                <div class="step-name">Pay Bills</div>
-                <div class="step-desc">Schedule & send payments</div>
-              </div>
-              <span class="step-badge warn">$21,200</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">📤</div>
-              <div class="step-info">
-                <div class="step-name">Write Checks</div>
-                <div class="step-desc">Print or send checks</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- EMPLOYEES & COMPANY LANE -->
-        <div class="lane">
-          <div class="lane-header">
-            <span class="lane-icon">👷</span>
-            <span class="lane-title">Employees</span>
-            <span class="lane-count">8 staff</span>
-          </div>
-          <div class="lane-body">
-
-            <div class="step">
-              <div class="step-icon">⏱️</div>
-              <div class="step-info">
-                <div class="step-name">Enter Time</div>
-                <div class="step-desc">Log employee hours</div>
-              </div>
-              <span class="step-badge">32h this week</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">💼</div>
-              <div class="step-info">
-                <div class="step-name">Pay Employees</div>
-                <div class="step-desc">Run payroll cycle</div>
-              </div>
-              <span class="step-badge warn">Due Fri</span>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">🏛️</div>
-              <div class="step-info">
-                <div class="step-name">Pay Payroll Taxes</div>
-                <div class="step-desc">File & remit taxes</div>
-              </div>
-            </div>
-
-            <!-- Divider -->
-            <div style="height:1px;background:var(--border);margin:4px 0;"></div>
-            <div style="font-size:10px;color:var(--text-muted);padding:2px 0 4px;letter-spacing:0.06em;text-transform:uppercase;">Company</div>
-
-            <div class="step">
-              <div class="step-icon">📊</div>
-              <div class="step-info">
-                <div class="step-name">Chart of Accounts</div>
-                <div class="step-desc">Manage account list</div>
-              </div>
-            </div>
-            <div class="step-arrow">↓</div>
-
-            <div class="step">
-              <div class="step-icon">📈</div>
-              <div class="step-info">
-                <div class="step-name">Reports</div>
-                <div class="step-desc">P&L, Balance Sheet, Cash Flow</div>
-              </div>
-              <span class="step-badge">15 saved</span>
-            </div>
-
-          </div>
         </div>
       </div>
 
-      <!-- Bottom Row -->
-      <div class="bottom-row">
+      <!-- ════════════════════════════════════════════════════════
+           VENDORS  — branching workflow
+           Main:   PO → Receive Items → Bills vs Inventory → Pay Bills
+           Branch: Enter Bills ────────────────────────────────▶ Pay Bills
+           ════════════════════════════════════════════════════════ -->
+      <div class="wf-section">
+        <div class="wf-hdr">
+          <span class="wf-hdr-ic">🏭</span>
+          <span class="wf-hdr-title">Vendors</span>
+          <span class="wf-hdr-badge w">5 bills due · $21,200</span>
+        </div>
+        <div class="wf-body">
 
-        <!-- Snapshot Card -->
-        <div class="sum-card">
-          <div class="sum-card-title"><div class="dot"></div>Revenue Snapshot</div>
-          <div class="kpi-row">
-            <div class="kpi">
-              <div class="kpi-val">$84.2K</div>
-              <div class="kpi-key">MTD Revenue</div>
+          <!-- Main flow row -->
+          <div class="flow-row" id="vrow">
+            <div class="wf-node" id="vpo">
+              <div class="nn-ic">📋</div>
+              <div class="nn-lbl">Purchase<br>Orders</div>
+              <div class="nn-badge">2 open</div>
             </div>
-            <div class="kpi">
-              <div class="kpi-val warn">$61.1K</div>
-              <div class="kpi-key">MTD Expenses</div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node" id="vrec">
+              <div class="nn-ic">📦</div>
+              <div class="nn-lbl">Receive<br>Items</div>
             </div>
-            <div class="kpi">
-              <div class="kpi-val">$23.1K</div>
-              <div class="kpi-key">Net Income</div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node" id="vbillsinv">
+              <div class="nn-ic">🧾</div>
+              <div class="nn-lbl">Enter Bills<br>Against Inventory</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node" id="vpaybills">
+              <div class="nn-ic">💳</div>
+              <div class="nn-lbl">Pay Bills</div>
+              <div class="nn-badge w">$21,200 due</div>
+            </div>
+
+            <div class="row-gap"></div>
+
+            <div class="wf-node sm">
+              <div class="nn-ic">🏷️</div>
+              <div class="nn-lbl">Manage<br>Sales Tax</div>
             </div>
           </div>
-          <div class="mini-chart">
-            <div class="bar-col"><div class="bar" style="height:22px"></div><div class="bar-label">Dec</div></div>
-            <div class="bar-col"><div class="bar" style="height:30px"></div><div class="bar-label">Jan</div></div>
-            <div class="bar-col"><div class="bar" style="height:18px"></div><div class="bar-label">Feb</div></div>
-            <div class="bar-col"><div class="bar" style="height:35px"></div><div class="bar-label">Mar</div></div>
-            <div class="bar-col"><div class="bar" style="height:28px"></div><div class="bar-label">Apr</div></div>
-            <div class="bar-col"><div class="bar" style="height:38px;background:linear-gradient(to top,#00e05a,#2aff72);box-shadow:0 0 10px #2aff7266;"></div><div class="bar-label" style="color:var(--green-1)">May</div></div>
+
+          <!-- Branch row: Enter Bills path merging into Pay Bills above -->
+          <!--
+            Layout:
+              [spacer = PO(108) + arr(36) = 144px aligns under Receive Items]
+              vertical drop  ↓
+              [Enter Bills node, 75px]
+              branch run:  └──────────────────────────────────────────────▶
+          -->
+          <div style="display:flex; align-items:flex-start; margin-top:0;">
+            <!-- spacer: PO node (108) + connector (36) = 144px, centres the drop under Receive Items -->
+            <div style="width:144px; flex-shrink:0;"></div>
+
+            <!-- vertical drop + Enter Bills node + branch run -->
+            <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+              <!-- vertical drop line from Receive Items row above -->
+              <div style="width:2px; height:9px; background:var(--green-muted); box-shadow:0 0 5px var(--green-muted);"></div>
+
+              <!-- Enter Bills node -->
+              <div class="wf-node sm" style="width:78px; margin:0; border-style:dashed; opacity:.88;">
+                <div class="nn-ic" style="font-size:20px;">📝</div>
+                <div class="nn-lbl">Enter Bills</div>
+              </div>
+
+              <!-- branch run connects right toward Pay Bills -->
+              <div class="branch-run" style="align-self:flex-start; margin-top:5px; padding-left:2px;">
+                └────────────────────────────────────────────▶
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           EMPLOYEES  — linear workflow chain
+           Enter Time → Pay Employees → Pay Taxes → Process Forms
+           ════════════════════════════════════════════════════════ -->
+      <div class="wf-section">
+        <div class="wf-hdr">
+          <span class="wf-hdr-ic">👷</span>
+          <span class="wf-hdr-title">Employees</span>
+          <span class="wf-hdr-badge w">Payroll due Friday · 8 staff</span>
+        </div>
+        <div class="wf-body">
+
+          <div class="flow-row">
+            <div class="wf-node">
+              <div class="nn-ic">⏱️</div>
+              <div class="nn-lbl">Enter<br>Time</div>
+              <div class="nn-badge">32 h this week</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">💼</div>
+              <div class="nn-lbl">Pay<br>Employees</div>
+              <div class="nn-badge w">Due Friday</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">🏛️</div>
+              <div class="nn-lbl">Pay Payroll<br>Taxes</div>
+            </div>
+            <div class="flow-arr"><div class="arr-line"></div><div class="arr-head">▶</div></div>
+
+            <div class="wf-node">
+              <div class="nn-ic">📋</div>
+              <div class="nn-lbl">Process<br>Payroll Forms</div>
+            </div>
+
+            <div class="row-gap"></div>
+
+            <div class="wf-node sm">
+              <div class="nn-ic">🆔</div>
+              <div class="nn-lbl">HR &amp;<br>Benefits</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           COMPANY  +  BANKING  (side by side icon grids)
+           ════════════════════════════════════════════════════════ -->
+      <div class="two-col">
+
+        <!-- Company -->
+        <div class="wf-section">
+          <div class="wf-hdr">
+            <span class="wf-hdr-ic">🏢</span>
+            <span class="wf-hdr-title">Company</span>
+          </div>
+          <div class="icon-grid">
+            <div class="ig-node"><div class="ig-ic">📊</div><div class="ig-lbl">Chart of Accounts</div></div>
+            <div class="ig-node"><div class="ig-ic">📦</div><div class="ig-lbl">Items &amp; Services</div></div>
+            <div class="ig-node"><div class="ig-ic">📓</div><div class="ig-lbl">Journal Entries</div></div>
+            <div class="ig-node"><div class="ig-ic">📅</div><div class="ig-lbl">Calendar</div></div>
+            <div class="ig-node"><div class="ig-ic">🗒️</div><div class="ig-lbl">Memorized Transactions</div></div>
+            <div class="ig-node"><div class="ig-ic">📈</div><div class="ig-lbl">Reports Center</div></div>
           </div>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="sum-card">
-          <div class="sum-card-title"><div class="dot"></div>Recent Activity</div>
-          <div class="activity-list">
-            <div class="act-item">
-              <div class="act-dot green"></div>
-              <div class="act-info">
-                <div class="act-name">Payment Received — TechNova Inc.</div>
-                <div class="act-meta">Invoice #1082 &nbsp;·&nbsp; 2h ago</div>
-              </div>
-              <div class="act-amount">+$6,400</div>
-            </div>
-            <div class="act-item">
-              <div class="act-dot warn"></div>
-              <div class="act-info">
-                <div class="act-name">Bill Due — Office Depot</div>
-                <div class="act-meta">Due in 2 days</div>
-              </div>
-              <div class="act-amount warn">$1,240</div>
-            </div>
-            <div class="act-item">
-              <div class="act-dot green"></div>
-              <div class="act-info">
-                <div class="act-name">Invoice Sent — Riverstone LLC</div>
-                <div class="act-meta">Invoice #1083 &nbsp;·&nbsp; Today</div>
-              </div>
-              <div class="act-amount">$9,800</div>
-            </div>
-            <div class="act-item">
-              <div class="act-dot red"></div>
-              <div class="act-info">
-                <div class="act-name">Overdue Invoice — Clark & Co.</div>
-                <div class="act-meta">Invoice #1071 &nbsp;·&nbsp; 14 days late</div>
-              </div>
-              <div class="act-amount warn">$4,100</div>
-            </div>
-            <div class="act-item">
-              <div class="act-dot green"></div>
-              <div class="act-info">
-                <div class="act-name">Payroll Processed</div>
-                <div class="act-meta">8 employees &nbsp;·&nbsp; Yesterday</div>
-              </div>
-              <div class="act-amount">$22,600</div>
-            </div>
+        <!-- Banking -->
+        <div class="wf-section">
+          <div class="wf-hdr">
+            <span class="wf-hdr-ic">🏦</span>
+            <span class="wf-hdr-title">Banking</span>
           </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="sum-card">
-          <div class="sum-card-title"><div class="dot"></div>Quick Actions</div>
-          <div class="quick-actions" style="flex-wrap:wrap;gap:8px;">
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">📄</span>
-              <span class="qa-label">New Invoice</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">📝</span>
-              <span class="qa-label">Estimate</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">💳</span>
-              <span class="qa-label">Pay Bill</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">📦</span>
-              <span class="qa-label">Receive Item</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">💵</span>
-              <span class="qa-label">Receive Pmt</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">📊</span>
-              <span class="qa-label">P&L Report</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">🏦</span>
-              <span class="qa-label">Deposit</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">🔄</span>
-              <span class="qa-label">Reconcile</span>
-            </div>
-            <div class="qa-btn" style="min-width:calc(33% - 6px)">
-              <span class="qa-icon">⚙️</span>
-              <span class="qa-label">Settings</span>
-            </div>
+          <div class="icon-grid">
+            <div class="ig-node"><div class="ig-ic">✏️</div><div class="ig-lbl">Write Checks</div></div>
+            <div class="ig-node"><div class="ig-ic">📖</div><div class="ig-lbl">Use Register</div></div>
+            <div class="ig-node"><div class="ig-ic">🔄</div><div class="ig-lbl">Transfer Funds</div></div>
+            <div class="ig-node"><div class="ig-ic">🔐</div><div class="ig-lbl">Reconcile</div></div>
+            <div class="ig-node"><div class="ig-ic">📡</div><div class="ig-lbl">Bank Feeds</div></div>
+            <div class="ig-node"><div class="ig-ic">📤</div><div class="ig-lbl">Online Banking</div></div>
           </div>
         </div>
 
       </div>
     </div>
+    <!-- end .canvas -->
 
     <!-- Right Panel -->
     <div class="right-panel">
 
-      <!-- Reminders -->
-      <div class="rp-section">
-        <div class="rp-title">Reminders</div>
-        <div class="reminder-item">
-          <span class="rem-icon">💳</span>
-          <div>
-            <div class="rem-text">5 bills to pay</div>
-            <div class="rem-due soon">Due within 7 days</div>
+      <div class="rp-sec">
+        <div class="rp-t">Reminders</div>
+        <div class="rem">
+          <span class="rem-ic">💳</span>
+          <div class="rem-body">
+            <div class="rem-tx">5 bills to pay</div>
+            <div class="rem-d s">Due within 7 days</div>
           </div>
         </div>
-        <div class="reminder-item">
-          <span class="rem-icon">📄</span>
-          <div>
-            <div class="rem-text">4 invoices unpaid</div>
-            <div class="rem-due soon">Follow up needed</div>
+        <div class="rem">
+          <span class="rem-ic">📄</span>
+          <div class="rem-body">
+            <div class="rem-tx">4 invoices unpaid</div>
+            <div class="rem-d s">Follow up needed</div>
           </div>
         </div>
-        <div class="reminder-item">
-          <span class="rem-icon">🚨</span>
-          <div>
-            <div class="rem-text">Clark & Co. — $4,100 overdue</div>
-            <div class="rem-due overdue">14 days past due</div>
+        <div class="rem">
+          <span class="rem-ic">🚨</span>
+          <div class="rem-body">
+            <div class="rem-tx">Clark &amp; Co. — $4,100</div>
+            <div class="rem-d ov">14 days past due</div>
           </div>
         </div>
-        <div class="reminder-item">
-          <span class="rem-icon">💼</span>
-          <div>
-            <div class="rem-text">Payroll due this Friday</div>
-            <div class="rem-due soon">In 3 days</div>
+        <div class="rem">
+          <span class="rem-ic">💼</span>
+          <div class="rem-body">
+            <div class="rem-tx">Payroll due Friday</div>
+            <div class="rem-d s">In 3 days · 8 employees</div>
           </div>
         </div>
-        <div class="reminder-item">
-          <span class="rem-icon">🏦</span>
-          <div>
-            <div class="rem-text">Reconcile checking account</div>
-            <div class="rem-due">Suggested monthly</div>
+        <div class="rem">
+          <span class="rem-ic">🏦</span>
+          <div class="rem-body">
+            <div class="rem-tx">Reconcile checking</div>
+            <div class="rem-d">Monthly recommended</div>
           </div>
         </div>
       </div>
 
-      <!-- Account Balances -->
-      <div class="rp-section">
-        <div class="rp-title">Account Balances</div>
-        <div class="bal-item">
-          <span class="bal-name">Checking · ••4821</span>
-          <span class="bal-val">$98,430</span>
-        </div>
-        <div class="bal-item">
-          <span class="bal-name">Savings · ••1192</span>
-          <span class="bal-val">$44,400</span>
-        </div>
-        <div class="bal-item">
-          <span class="bal-name">Petty Cash</span>
-          <span class="bal-val">$850</span>
-        </div>
-        <div class="bal-item">
-          <span class="bal-name">Credit Card</span>
-          <span class="bal-val neg">-$7,220</span>
-        </div>
-        <div class="bal-item" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
-          <span class="bal-name" style="font-weight:700;color:var(--text-bright)">Net Position</span>
-          <span class="bal-val" style="font-size:14px">$136,460</span>
+      <div class="rp-sec">
+        <div class="rp-t">Account Balances</div>
+        <div class="bal"><span class="bal-n">Checking ··4821</span><span class="bal-v">$98,430</span></div>
+        <div class="bal"><span class="bal-n">Savings ··1192</span><span class="bal-v">$44,400</span></div>
+        <div class="bal"><span class="bal-n">Petty Cash</span><span class="bal-v">$850</span></div>
+        <div class="bal"><span class="bal-n">Credit Card</span><span class="bal-v neg">−$7,220</span></div>
+        <div class="bal" style="border-top:1px solid var(--border);padding-top:7px;margin-top:3px;">
+          <span class="bal-n" style="color:var(--text-bright);font-weight:700;">Net Position</span>
+          <span class="bal-v" style="font-size:13px;">$136,460</span>
         </div>
       </div>
 
-      <!-- Mini Calendar -->
-      <div class="rp-section">
-        <div class="rp-title">May 2026</div>
-        <div class="cal-grid">
-          <div class="cal-day-label">Su</div>
-          <div class="cal-day-label">Mo</div>
-          <div class="cal-day-label">Tu</div>
-          <div class="cal-day-label">We</div>
-          <div class="cal-day-label">Th</div>
-          <div class="cal-day-label">Fr</div>
-          <div class="cal-day-label">Sa</div>
-          <!-- Week 1 -->
-          <div class="cal-day other-month">27</div>
-          <div class="cal-day other-month">28</div>
-          <div class="cal-day other-month">29</div>
-          <div class="cal-day other-month">30</div>
-          <div class="cal-day has-event">1</div>
-          <div class="cal-day">2</div>
-          <div class="cal-day">3</div>
-          <!-- Week 2 -->
-          <div class="cal-day">4</div>
-          <div class="cal-day has-event">5</div>
-          <div class="cal-day">6</div>
-          <div class="cal-day">7</div>
-          <div class="cal-day">8</div>
-          <div class="cal-day">9</div>
-          <div class="cal-day">10</div>
-          <!-- Week 3 -->
-          <div class="cal-day">11</div>
-          <div class="cal-day">12</div>
-          <div class="cal-day">13</div>
-          <div class="cal-day">14</div>
-          <div class="cal-day has-event">15</div>
-          <div class="cal-day">16</div>
-          <div class="cal-day">17</div>
-          <!-- Week 4 -->
-          <div class="cal-day">18</div>
-          <div class="cal-day">19</div>
-          <div class="cal-day has-event">20</div>
-          <div class="cal-day">21</div>
-          <div class="cal-day">22</div>
-          <div class="cal-day">23</div>
-          <div class="cal-day today">24</div>
-          <!-- Week 5 -->
-          <div class="cal-day">25</div>
-          <div class="cal-day">26</div>
-          <div class="cal-day has-event">27</div>
-          <div class="cal-day">28</div>
-          <div class="cal-day">29</div>
-          <div class="cal-day">30</div>
-          <div class="cal-day">31</div>
+      <div class="rp-sec">
+        <div class="rp-t">Recent</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #121b12;">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green-1);box-shadow:0 0 5px var(--green-1);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:10.5px;color:var(--text-main);">TechNova Inc. paid</div>
+              <div style="font-size:9px;color:var(--text-muted);">Inv #1082 · 2 h ago</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--green-1);">+$6,400</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #121b12;">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--warn);box-shadow:0 0 5px var(--warn);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:10.5px;color:var(--text-main);">Office Depot bill due</div>
+              <div style="font-size:9px;color:var(--text-muted);">Due in 2 days</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--warn);">$1,240</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #121b12;">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green-1);box-shadow:0 0 5px var(--green-1);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:10.5px;color:var(--text-main);">Invoice sent</div>
+              <div style="font-size:9px;color:var(--text-muted);">Riverstone LLC · today</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--green-1);">$9,800</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;padding:5px 0;">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 5px var(--red);flex-shrink:0;"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:10.5px;color:var(--text-main);">Clark &amp; Co. overdue</div>
+              <div style="font-size:9px;color:var(--red);">14 days late</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--warn);">$4,100</div>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
+  <!-- end .body -->
 
   <!-- ── Status Bar ─────────────────────────────────────────────────────── -->
-  <div class="status-bar">
-    <div class="sb-item">
-      <div class="sb-dot"></div>
-      Connected
-    </div>
-    <div class="sb-sep"></div>
-    <div class="sb-item">Company file: AcmeEnterprises2026.bcx</div>
-    <div class="sb-sep"></div>
-    <div class="sb-item">Last sync: Today 11:42 AM</div>
-    <div class="sb-sep"></div>
-    <div class="sb-item">Multi-user mode: ON &nbsp;·&nbsp; 2 users active</div>
-    <div class="sb-right">BizCore OS v1.0.0 &nbsp;·&nbsp; © 2026</div>
+  <div class="statusbar">
+    <div class="sb-dot"></div>
+    <span>Connected</span>
+    <div class="sb-pipe"></div>
+    <span>AcmeEnterprises2026.bcx</span>
+    <div class="sb-pipe"></div>
+    <span>Last sync: Today 11:42 AM</span>
+    <div class="sb-pipe"></div>
+    <span>Multi-user: ON &nbsp;·&nbsp; 2 active</span>
+    <span class="sb-right">BizCore OS v1.0.0 &nbsp;·&nbsp; © 2026</span>
   </div>
 
-</div>
+</div><!-- end .app -->
 
 <script>
-  // Hover glow effect on steps
-  document.querySelectorAll('.step').forEach(el => {
-    el.addEventListener('mouseenter', () => {
-      el.style.boxShadow = '0 0 14px #2aff7244, 0 0 30px #2aff7211';
-    });
-    el.addEventListener('mouseleave', () => {
-      el.style.boxShadow = '';
+  /* Sidebar active state */
+  document.querySelectorAll('.sbi').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.sbi').forEach(s => s.classList.remove('on'));
+      el.classList.add('on');
     });
   });
 
-  // Sidebar item click
-  document.querySelectorAll('.sidebar-item').forEach(el => {
+  /* Toolbar button press animation */
+  document.querySelectorAll('.tbtn').forEach(el => {
     el.addEventListener('click', () => {
-      document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
-      el.classList.add('active');
+      el.style.transition = 'transform .08s';
+      el.style.transform = 'scale(.9)';
+      setTimeout(() => { el.style.transform = ''; }, 95);
     });
   });
 
-  // Toolbar button click ripple
-  document.querySelectorAll('.tb-btn, .qa-btn').forEach(el => {
+  /* Node click ripple */
+  document.querySelectorAll('.wf-node, .ig-node').forEach(el => {
     el.addEventListener('click', () => {
-      el.style.transition = 'transform 0.1s';
-      el.style.transform = 'scale(0.94)';
-      setTimeout(() => { el.style.transform = ''; }, 120);
+      const orig = el.style.transition;
+      el.style.transition = 'transform .08s';
+      el.style.transform = 'scale(.93) translateY(0)';
+      setTimeout(() => {
+        el.style.transition = orig;
+        el.style.transform = '';
+      }, 100);
     });
   });
 </script>
-
 </body>
 </html>
